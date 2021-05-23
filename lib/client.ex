@@ -1,4 +1,5 @@
 defmodule WsTrade.Client do
+  @moduledoc false
   use Tesla
 
   plug(Tesla.Middleware.BaseUrl, Application.get_env(:ws_trade, :base_url))

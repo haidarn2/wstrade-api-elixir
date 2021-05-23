@@ -1,4 +1,5 @@
 defmodule WsTrade.Auth do
+  @moduledoc false
   require Logger
   alias WsTrade.Client
 
@@ -40,13 +41,20 @@ defmodule WsTrade.Auth do
     end
   end
 
-  def login(email, password, get_otp_func) when is_function(get_otp_func, 0) do
-    with {:ok, _} <- login(email, password),
-         {:ok, otp_str} <- get_otp_func.(),
-         {:ok, _} <- login(email, password, otp_str) do
+  def login(email, password, otp_provider_func) when is_function(otp_provider_func, 0) do
+    with {:ok, opt_challenge_triggered} <- login(email, password),
+         {:ok, otp_str} <- otp_provider_func.(),
+         {:ok, successfully_logged_in} <- login(email, password, otp_str) do
       Logger.debug("Login successful.")
+      {:ok, :successfully_logged_in}
     else
-      e -> Logger.error("Login failed!\n#{inspect(e)}")
+      {:error, err} ->
+        Logger.error("Login failed!\n#{inspect(err)}")
+        {:error, err}
+
+      e ->
+        Logger.error("Login failed!\n#{inspect(e)}")
+        {:error, :unexpected_error}
     end
   end
 end
