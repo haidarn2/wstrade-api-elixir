@@ -3,6 +3,8 @@ defmodule WsTrade.Auth do
   require Logger
   alias WsTrade.Client
 
+  @oauth_header_keys ["x-access-token", "x-refresh-token", "x-access-token-expires"]
+
   def login(email, password) do
     Client.login(email, password, "")
     |> case do
@@ -23,9 +25,13 @@ defmodule WsTrade.Auth do
   def login(email, password, otp_str) when is_binary(otp_str) do
     Client.login(email, password, otp_str)
     |> case do
-      {:ok, %{status: 200}} ->
+      {:ok, %{status: 200, headers: headers}} ->
         Logger.debug("Got 200 from login")
-        {:ok, :successfully_logged_in}
+
+        {:ok,
+         headers
+         |> Map.new()
+         |> Map.take(@oauth_header_keys)}
 
       {:ok, %{status: 401} = resp} ->
         Logger.error("Incorrect credentials!\n#{inspect(resp)}")
@@ -42,11 +48,11 @@ defmodule WsTrade.Auth do
   end
 
   def login(email, password, otp_provider_func) when is_function(otp_provider_func, 0) do
-    with {:ok, opt_challenge_triggered} <- login(email, password),
+    with {:ok, :opt_challenge_triggered} <- login(email, password),
          {:ok, otp_str} <- otp_provider_func.(),
-         {:ok, successfully_logged_in} <- login(email, password, otp_str) do
+         {:ok, oauth_token} <- login(email, password, otp_str) do
       Logger.debug("Login successful.")
-      {:ok, :successfully_logged_in}
+      {:ok, oauth_token}
     else
       {:error, err} ->
         Logger.error("Login failed!\n#{inspect(err)}")
