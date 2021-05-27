@@ -7,6 +7,7 @@ defmodule WsTrade.Application do
 
   def start(_type, _args) do
     children = [
+      WsTrade.Auth.TokenCache
       # Starts a worker by calling: WsTrade.Worker.start_link(arg)
       # {WsTrade.Worker, arg}
     ]

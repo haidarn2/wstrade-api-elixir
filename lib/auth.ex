@@ -1,7 +1,8 @@
 defmodule WsTrade.Auth do
   @moduledoc false
   require Logger
-  alias WsTrade.Client
+  alias WsTrade.Auth.Client
+  alias WsTrade.Auth.TokenCache
 
   @oauth_header_keys ["x-access-token", "x-refresh-token", "x-access-token-expires"]
 
@@ -26,12 +27,15 @@ defmodule WsTrade.Auth do
     Client.login(email, password, otp_str)
     |> case do
       {:ok, %{status: 200, headers: headers}} ->
-        Logger.debug("Got 200 from login")
+        Logger.debug("Login Successful.")
 
-        {:ok,
-         headers
-         |> Map.new()
-         |> Map.take(@oauth_header_keys)}
+        oauth_token =
+          headers
+          |> Map.new()
+          |> Map.take(@oauth_header_keys)
+
+        TokenCache.set_token(oauth_token)
+        {:ok, oauth_token}
 
       {:ok, %{status: 401} = resp} ->
         Logger.error("Incorrect credentials!\n#{inspect(resp)}")
@@ -60,6 +64,32 @@ defmodule WsTrade.Auth do
 
       e ->
         Logger.error("Login failed!\n#{inspect(e)}")
+        {:error, :unexpected_error}
+    end
+  end
+
+  def refresh() do
+    with {:ok, %{"x-refresh-token" => refresh_token}} <- TokenCache.get_token(),
+         {:ok, %{status: 200, headers: headers}} <- Client.refresh(refresh_token) do
+      Logger.debug("token refresh successful.")
+
+      oauth_token =
+        headers
+        |> Map.new()
+        |> Map.take(@oauth_header_keys)
+
+      TokenCache.set_token(oauth_token)
+    else
+      {:error, :not_logged_in} = e ->
+        e
+
+      {:ok, %{status: 401} = resp} ->
+        Logger.error("Invalid refresh token! Logging out!\n#{inspect(resp)}")
+        TokenCache.flush()
+        {:error, :invalid_refresh_token}
+
+      e ->
+        Logger.error("Refresh failed!\n#{inspect(e)}")
         {:error, :unexpected_error}
     end
   end
