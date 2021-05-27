@@ -67,31 +67,4 @@ defmodule WsTrade.Auth do
         {:error, :unexpected_error}
     end
   end
-
-  def refresh() do
-    with {:ok, %{"x-refresh-token" => refresh_token}} <- TokenCache.get_token(),
-         {:ok, %{status: 200, headers: headers}} <- Client.refresh(refresh_token) do
-      Logger.debug("token refresh successful.")
-
-      oauth_token =
-        headers
-        |> Map.new()
-        |> Map.take(@oauth_header_keys)
-
-      TokenCache.set_token(oauth_token)
-      {:ok, oauth_token}
-    else
-      {:error, :not_logged_in} = e ->
-        e
-
-      {:ok, %{status: 401} = resp} ->
-        Logger.error("Invalid refresh token! Logging out!\n#{inspect(resp)}")
-        TokenCache.flush()
-        {:error, :invalid_refresh_token}
-
-      e ->
-        Logger.error("Refresh failed!\n#{inspect(e)}")
-        {:error, :unexpected_error}
-    end
-  end
 end

@@ -3,9 +3,10 @@ defmodule WsTrade.Auth.TokenCache do
 
   require Logger
 
-  alias WsTrade.Auth
+  alias WsTrade.Auth.Client
 
-  @refresh_freq :timer.seconds(5)
+  @oauth_header_keys ["x-access-token", "x-refresh-token", "x-access-token-expires"]
+  @refresh_freq :timer.hours(1)
 
   def start_link(_args), do: GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
 
@@ -22,9 +23,9 @@ defmodule WsTrade.Auth.TokenCache do
   end
 
   @impl true
-  def handle_info(:refresh, old_token) do
+  def handle_info(:refresh, %{"x-refresh-token" => token}) do
     Logger.debug("refreshing oauth token...")
-    %{:ok, new_token} = Auth.refresh()
+    {:ok, new_token} = refresh_token(token)
     schedule_refresh()
     {:noreply, new_token}
   end
@@ -57,5 +58,39 @@ defmodule WsTrade.Auth.TokenCache do
 
   defp schedule_refresh do
     Process.send_after(self(), :refresh, @refresh_freq)
+  end
+
+  defp refresh_token(refresh_token) do
+    with {:ok, %{status: 200, headers: headers}} <- Client.refresh(refresh_token) do
+      oauth_token =
+        headers
+        |> Map.new()
+        |> Map.take(@oauth_header_keys)
+
+      Logger.debug("token refresh successful. exipres on #{parse_expiry(oauth_token)}")
+
+      {:ok, oauth_token}
+    else
+      {:error, :not_logged_in} = e ->
+        e
+
+      {:ok, %{status: 401} = resp} ->
+        Logger.error("Invalid refresh token! Logging out!\n#{inspect(resp)}")
+        flush()
+        {:error, :invalid_refresh_token}
+
+      e ->
+        Logger.error("Refresh failed!\n#{inspect(e)}")
+        {:error, :unexpected_error}
+    end
+  end
+
+  defp parse_expiry(%{"x-access-token-expires" => exp_str}) do
+    exp_str
+    |> Integer.parse()
+    |> elem(0)
+    |> DateTime.from_unix()
+    |> elem(1)
+    |> DateTime.to_iso8601()
   end
 end

@@ -16,7 +16,7 @@ defmodule WsTrade.Client do
     TokenCache.get_token()
     |> case do
       {:ok, %{"x-access-token" => token}} -> token
-      _ -> nil
+      _ -> ""
     end
   end
 end
