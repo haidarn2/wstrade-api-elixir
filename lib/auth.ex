@@ -79,6 +79,7 @@ defmodule WsTrade.Auth do
         |> Map.take(@oauth_header_keys)
 
       TokenCache.set_token(oauth_token)
+      {:ok, oauth_token}
     else
       {:error, :not_logged_in} = e ->
         e

@@ -3,7 +3,7 @@ defmodule WsTrade.Auth.TokenCache do
 
   require Logger
 
-  # alias WsTrade.Auth
+  alias WsTrade.Auth
 
   @refresh_freq :timer.seconds(5)
 
@@ -24,8 +24,7 @@ defmodule WsTrade.Auth.TokenCache do
   @impl true
   def handle_info(:refresh, old_token) do
     Logger.debug("refreshing oauth token...")
-    # todo: use WsTrade.Auth
-    new_token = old_token
+    %{:ok, new_token} = Auth.refresh()
     schedule_refresh()
     {:noreply, new_token}
   end
