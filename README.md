@@ -27,7 +27,7 @@ end
 ```elixir
 # Trigger OTP (SMS 2FA)
 WsTrade.Auth.login("user@example.com", "my-password")
-{:ok, :opt_challenge_triggered}
+{:ok, :otp_challenge_triggered}
 # Login with OTP
 WsTrade.Auth.login("user@example.com", "my-password", "739677")
 {:ok, %{
