@@ -7,7 +7,7 @@ defmodule WsTrade.Auth.TokenCache do
   alias WsTrade.Auth.Client
 
   @oauth_header_keys ["x-access-token", "x-refresh-token", "x-access-token-expires"]
-  @refresh_freq :timer.hours(1)
+  @refresh_freq Application.compile_env(:ws_trade, :token_cache_refresh_freq)
 
   def start_link(_args), do: GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
 
@@ -57,8 +57,8 @@ defmodule WsTrade.Auth.TokenCache do
     set_token(nil)
   end
 
-  defp schedule_refresh do
-    Process.send_after(self(), :refresh, @refresh_freq)
+  defp schedule_refresh(freq \\ @refresh_freq) do
+    Process.send_after(self(), :refresh, freq)
   end
 
   defp refresh_token(refresh_token) do
