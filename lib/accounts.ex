@@ -198,4 +198,145 @@ defmodule WsTrade.Accounts do
         {:error, :remote_call_failed}
     end
   end
+
+  @doc """
+  Fetches all deposits linked to the logged in WealthSimple Trade account.
+
+  ## Examples
+
+  iex> WsTrade.Accounts.get_deposits()
+  {:ok,
+  %{
+   "object" => "deposit",
+   "results" => [
+     %{
+       "accepted_at" => "2021-05-05T19:23:21.000Z",
+       "account_id" => "non-registered-zzzzzzzz",
+       "bank_account_id" => "bank_account-zzzzzzzzzzzzzzzzzzzzzzzzzz",
+       "cancellable" => false,
+       "cancelled_at" => nil,
+       "created_at" => "2021-05-05T17:36:06.000Z",
+       "id" => "funds_transfer-zzzzzzzzzzzzzzzzzzzzzzzzz",
+       "instant_value" => %{"amount" => 250, "currency" => "CAD"},
+       "object" => "deposit",
+       "rejected_at" => nil,
+       "status" => "accepted",
+       "updated_at" => "2021-05-05T19:25:20.110Z",
+       "value" => %{"amount" => 250, "currency" => "CAD"}
+     }, ...
+   ]
+  }
+  """
+  def get_deposits() do
+    Client.get_deposits()
+    |> case do
+      {:ok, %{status: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %{status: 401}} ->
+        {:error, :unauthorized}
+
+      {:ok, %{status: _}} = e ->
+        Logger.error("unknown status!\n#{inspect(e)}")
+        {:error, :unknown_status}
+
+      _e ->
+        {:error, :remote_call_failed}
+    end
+  end
+
+  @doc """
+  Fetches all bank accounts linked to the logged in WealthSimple Trade account.
+
+  ## Examples
+
+  iex> WsTrade.Accounts.get_bank_accounts()
+  {:ok,
+  %{
+   "results" => [
+     %{
+       "account_name" => nil,
+       "account_number" => "****zzz",
+       "corporate" => false,
+       "created_at" => "2019-03-13T21:59:56Z",
+       "id" => "bank_account-zzzzzzzzzzzzzzzzzzzzzzzzzz",
+       "institution_name" => "zz",
+       "institution_number" => "zzz",
+       "jurisdiction" => "CA",
+       "nickname" => nil,
+       "object" => "bank_account",
+       "transit_number" => "zzzzz",
+       "type" => "chequing",
+       "updated_at" => "2019-03-13T21:59:56Z",
+       "verification_documents" => [
+         %{
+           "acceptable" => true,
+           "document_id" => "document-zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz",
+           "document_type" => "zzzzz",
+           "id" => "verification_document-zzzzzzzzzzzzzzzzzzzzzzzzz",
+           "reviewed_at" => "2021-01-01T19:42:20Z"
+         }, ...
+       ],
+       "verifications" => [
+         %{
+           "document_id" => "document-9ea83fec-cc1c-4b9d-941a-21b5751773b7",
+           "id" => "verification-AQS6O3oVj8VY0eSKvqO7Bprpw2c",
+           "method" => "plaid",
+           "processed_at" => "2021-01-01T19:42:30Z",
+           "status" => "accepted"
+         }, ...
+       ]
+     }
+   ]
+  }}
+  """
+  def get_bank_accounts() do
+    Client.get_bank_accounts()
+    |> case do
+      {:ok, %{status: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %{status: 401}} ->
+        {:error, :unauthorized}
+
+      {:ok, %{status: _}} = e ->
+        Logger.error("unknown status!\n#{inspect(e)}")
+        {:error, :unknown_status}
+
+      _e ->
+        {:error, :remote_call_failed}
+    end
+  end
+
+  @doc """
+  ## Fetches the current USD/CAD Exchange rates
+
+  iex> WsTrade.Accounts.get_exchange_rates()
+  {:ok,
+  %{
+   "USD" => %{
+     "buy_rate" => 1.229,
+     "fx_rate" => 1.2106,
+     "sell_rate" => 1.1924,
+     "spread" => 0.015
+   }
+  }}
+  """
+  def get_exchange_rates() do
+    Client.get_exchange_rates()
+    |> case do
+      {:ok, %{status: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %{status: 401}} ->
+        {:error, :unauthorized}
+
+      {:ok, %{status: _}} = e ->
+        Logger.error("unknown status!\n#{inspect(e)}")
+        {:error, :unknown_status}
+
+      _e ->
+        {:error, :remote_call_failed}
+    end
+  end
 end

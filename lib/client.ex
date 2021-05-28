@@ -35,6 +35,18 @@ defmodule WsTrade.Client do
     )
   end
 
+  def get_deposits() do
+    get("/deposits")
+  end
+
+  def get_bank_accounts() do
+    get("/bank-accounts")
+  end
+
+  def get_exchange_rates() do
+    get("/forex")
+  end
+
   defp get_auth_token do
     TokenCache.get_token()
     |> case do
