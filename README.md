@@ -1,5 +1,7 @@
 # wstrade-api-elixir
 
+[https://hex.pm/packages/ws_trade/](https://hex.pm/packages/ws_trade/)
+
 An work-in-progress elixir wrapper of the [Wealthsimple Trade](https://www.wealthsimple.com/en-ca/product/trade/) REST API.
 
 This wrapper is a port of [wstrade-api](https://github.com/ahmedsakr/wstrade-api) (an unofficial javascript wrapper).
@@ -339,4 +341,5 @@ WsTrade.Data.get_exchange_rates()
   }
 }
 ```
-[https://hexdocs.pm/ws_trade](https://hexdocs.pm/ws_trade)
+# License
+This project is licensed under the MIT License.
