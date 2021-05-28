@@ -4,7 +4,11 @@ defmodule WsTrade.Client do
 
   alias WsTrade.Auth.TokenCache
 
-  plug(Tesla.Middleware.BaseUrl, Application.get_env(:ws_trade, :base_url))
+  plug(
+    Tesla.Middleware.BaseUrl,
+    Application.get_env(:ws_trade, :base_url) || "https://trade-service.wealthsimple.com"
+  )
+
   plug(Tesla.Middleware.JSON)
   plug(WsTrade.Client.Middleware.RuntimeHeader, {"Authorization", &get_auth_token/0})
 
