@@ -8,6 +8,7 @@ defmodule WsTrade.MixProject do
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      description: description(),
       package: package()
     ]
   end
@@ -32,10 +33,13 @@ defmodule WsTrade.MixProject do
     ]
   end
 
+  defp description do
+    "An work-in-progress elixir wrapper of the WealthSimple Trade REST API."
+  end
+
   defp package do
     [
-      files: ~w(lib priv .formatter.exs mix.exs README* readme* LICENSE*
-                license* CHANGELOG* changelog* src),
+      files: ~w(lib .formatter.exs mix.exs README* LICENSE),
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/haidarn2/wstrade-api-elixir"}
     ]
