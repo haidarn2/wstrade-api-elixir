@@ -11,7 +11,7 @@ defmodule WsTrade.Auth do
     |> case do
       {:ok, %{status: 401}} ->
         Logger.debug("Got 401 from otp challenge")
-        {:ok, :opt_challenge_triggered}
+        {:ok, :otp_challenge_triggered}
 
       {:ok, %{status: status} = resp} ->
         Logger.error("Got unsupported status #{status}!\n#{inspect(resp)}")
@@ -52,7 +52,7 @@ defmodule WsTrade.Auth do
   end
 
   def login(email, password, otp_provider_func) when is_function(otp_provider_func, 0) do
-    with {:ok, :opt_challenge_triggered} <- login(email, password),
+    with {:ok, :otp_challenge_triggered} <- login(email, password),
          {:ok, otp_str} <- otp_provider_func.(),
          {:ok, oauth_token} <- login(email, password, otp_str) do
       Logger.debug("Login successful.")

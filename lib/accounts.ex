@@ -2,7 +2,7 @@ defmodule WsTrade.Accounts do
   require Logger
 
   @moduledoc """
-  A module that implements functions for retrieving WS Trade account details
+  A module that provides functions for retrieving WS Trade account details
   """
   alias WsTrade.Client
 
@@ -21,7 +21,7 @@ defmodule WsTrade.Accounts do
   ]
 
   @doc """
-    Retrieves all account ids open under the logged in WealthSimple Trade account.
+    Retrieves all accounts under the logged in WealthSimple Trade account.
 
   ## Examples
 
@@ -225,7 +225,7 @@ defmodule WsTrade.Accounts do
        "value" => %{"amount" => 250, "currency" => "CAD"}
      }, ...
    ]
-  }
+  }}
   """
   def get_deposits do
     Client.get_deposits()
@@ -292,38 +292,6 @@ defmodule WsTrade.Accounts do
   """
   def get_bank_accounts do
     Client.get_bank_accounts()
-    |> case do
-      {:ok, %{status: 200, body: body}} ->
-        {:ok, body}
-
-      {:ok, %{status: 401}} ->
-        {:error, :unauthorized}
-
-      {:ok, %{status: _}} = e ->
-        Logger.error("unknown status!\n#{inspect(e)}")
-        {:error, :unknown_status}
-
-      _e ->
-        {:error, :remote_call_failed}
-    end
-  end
-
-  @doc """
-  ## Fetches the current USD/CAD Exchange rates
-
-  iex> WsTrade.Accounts.get_exchange_rates()
-  {:ok,
-  %{
-   "USD" => %{
-     "buy_rate" => 1.229,
-     "fx_rate" => 1.2106,
-     "sell_rate" => 1.1924,
-     "spread" => 0.015
-   }
-  }}
-  """
-  def get_exchange_rates do
-    Client.get_exchange_rates()
     |> case do
       {:ok, %{status: 200, body: body}} ->
         {:ok, body}
