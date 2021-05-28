@@ -24,6 +24,17 @@ defmodule WsTrade.Client do
     get("/account/history/#{interval}", query: [account_id: account_id])
   end
 
+  def account_activities(account_ids, limit, type, bookmark) do
+    get("/account/activities",
+      query: [
+        accountIds: account_ids,
+        type: type,
+        limit: limit,
+        bookmark: bookmark
+      ]
+    )
+  end
+
   defp get_auth_token do
     TokenCache.get_token()
     |> case do

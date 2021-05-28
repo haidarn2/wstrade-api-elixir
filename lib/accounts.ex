@@ -1,8 +1,24 @@
 defmodule WsTrade.Accounts do
+  require Logger
+
   @moduledoc """
   A module that implements functions for retrieving WS Trade account details
   """
   alias WsTrade.Client
+
+  @activity_fetch_limit 99
+  @activity_all_types [
+    "sell",
+    "deposit",
+    "withdrawal",
+    "dividend",
+    "institutional_transfer",
+    "internal_transfer",
+    "refund",
+    "referral_bonus",
+    "affiliate",
+    "buy"
+  ]
 
   @doc """
     Retrieves all account ids open under the logged in WealthSimple Trade account.
@@ -20,19 +36,19 @@ defmodule WsTrade.Accounts do
        "buying_power" => %{"amount" => 8.86, "currency" => "CAD"},
        "created_at" => "2021-01-01T19:42:29.515Z",
        "current_balance" => %{"amount" => 8.86, "currency" => "CAD"},
-       "custodian_account_number" => "HF544500CAD",
+       "custodian_account_number" => "zzzzzzzzzzz",
        "deleted_at" => nil,
-       "external_esignature_id" => "document-2de66g1e-c2e0-4061-a11c-52b0edb4f519",
-       "id" => "non-registered-afdggeh6",
+       "external_esignature_id" => "document-zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz",
+       "id" => "non-registered-zzzzzzzz",
        "last_synced_at" => "2021-05-27T22:22:16.288Z",
        "net_deposits" => %{"amount" => 7305, "currency" => "CAD"},
        "object" => "account",
        "opened_at" => "2021-01-01T19:42:55.099Z",
        "position_quantities" => %{
-         "sec-s-19dda65d393d4260af25087824e2ee0b" => 140,
-         "sec-s-271b88fdc6a8484692250f329c2733c6" => 100,
-         "sec-s-6e73535b8e474d8689064c4c9fee326a" => 140,
-         "sec-s-85286e8ff345468ab061146fc8bd2a82" => 13
+         "sec-s-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz" => 140,
+         "sec-s-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz" => 100,
+         "sec-s-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz" => 140,
+         "sec-s-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz" => 13
        },
        "read_only" => nil,
        "status" => "open",
@@ -59,7 +75,7 @@ defmodule WsTrade.Accounts do
 
   ## Examples
 
-  iex> WsTrade.Accounts.account_history("non-registered-afdggeh6", "1d")
+  iex> WsTrade.Accounts.account_history("non-registered-zzzzzzzz", "1d")
   {:ok,
   %{
     "previous_close_data_point" => %{
@@ -99,6 +115,87 @@ defmodule WsTrade.Accounts do
       {:ok, %{status: 401}} -> {:error, :unauthorized}
       {:ok, %{status: _}} -> {:error, :unknown_status}
       _e -> {:error, :remote_call_failed}
+    end
+  end
+
+  @doc """
+    Fetches activities on your Wealthsimple Trade account(s). You can limit number of activities to
+    fetch or refine what activities are fetched based on activity type (e.g., buy, sell).
+
+    By default, this function has a limit of 20 activities and can fetch up to a maximum of 99.
+    By default, all account activity types are fetched: "sell", "deposit", "withdrawal", "dividend",
+    "institutional_transfer", "internal_transfer", "refund", "referral_bonus", "affiliate", "buy".
+
+
+    ## Examples
+
+    iex> WsTrade.Accounts.account_activities(["non-registered-zzzzzzzz"], 1)
+    {:ok,
+     %{
+       "bookmark" => "zzzzzzzzzzzzzzz...",
+       "errors" => [],
+       "results" => [
+         %{
+           "account_value" => %{"amount" => 254.94, "currency" => "CAD"},
+           "settled" => true,
+           "order_sub_type" => "limit",
+           "completed_at" => nil,
+           "id" => "order-zzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz",
+           "use_kafka_consumer" => true,
+           "account_hold_value" => %{"amount" => 0, "currency" => "CAD"},
+           "security_id" => "sec-s-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+           "user_id" => zzzzzz,
+           "time_in_force" => "day",
+           "market_currency" => "CAD",
+           "fill_quantity" => 21,
+           "external_order_id" => "order-zzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz",
+           "order_id" => "order-zzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz",
+           "status" => "posted",
+           "limit_price" => %{"amount" => 12.21, "currency" => "CAD"},
+           "created_at" => "2021-05-05T17:38:36.213Z",
+           "bigint_id" => nil,
+           "external_order_batch_id" => "order-batch-zzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz",
+           "stop_price" => nil,
+           "quantity" => 21,
+           "market_value" => %{"amount" => 254.94, "currency" => "CAD"},
+           "account_currency" => "CAD",
+           "ip_address" => "99.238.68.169",
+           "perceived_filled_at" => "2021-05-05T17:38:37.462Z",
+           "object" => "order",
+           "symbol" => "CGX",
+           "external_security_id" => "sec-s-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+           "last_event_time" => "2021-05-05T17:38:37.040Z",
+           "order_type" => "buy_quantity",
+           "account_id" => "non-registered-zzzzzzzz",
+           "fill_fx_rate" => 1,
+           "filled_at" => "2021-05-05T17:38:36.490Z",
+           "updated_at" => "2021-05-05T17:39:30.262Z",
+           "security_name" => "Cineplex Inc"
+         }
+       ]
+     }}
+  """
+  def account_activities(account_ids, limit \\ 20, types \\ @activity_all_types)
+      when is_list(account_ids) and limit <= @activity_fetch_limit do
+    Client.account_activities(
+      account_ids |> Enum.join(","),
+      limit,
+      types,
+      ""
+    )
+    |> case do
+      {:ok, %{status: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %{status: 401}} ->
+        {:error, :unauthorized}
+
+      {:ok, %{status: _}} = e ->
+        Logger.error("unknown status!\n#{inspect(e)}")
+        {:error, :unknown_status}
+
+      _e ->
+        {:error, :remote_call_failed}
     end
   end
 end
