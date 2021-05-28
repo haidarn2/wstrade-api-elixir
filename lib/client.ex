@@ -8,8 +8,20 @@ defmodule WsTrade.Client do
   plug(Tesla.Middleware.JSON)
   plug(WsTrade.Client.Middleware.RuntimeHeader, {"Authorization", &get_auth_token/0})
 
+  def me() do
+    get("/me")
+  end
+
+  def person() do
+    get("/person")
+  end
+
   def get_accounts() do
     get("/account/list")
+  end
+
+  def account_history(account_id, interval) do
+    get("/account/history/#{interval}", query: [account_id: account_id])
   end
 
   defp get_auth_token do
