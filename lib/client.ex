@@ -8,15 +8,15 @@ defmodule WsTrade.Client do
   plug(Tesla.Middleware.JSON)
   plug(WsTrade.Client.Middleware.RuntimeHeader, {"Authorization", &get_auth_token/0})
 
-  def me() do
+  def me do
     get("/me")
   end
 
-  def person() do
+  def person do
     get("/person")
   end
 
-  def get_accounts() do
+  def get_accounts do
     get("/account/list")
   end
 
@@ -35,15 +35,15 @@ defmodule WsTrade.Client do
     )
   end
 
-  def get_deposits() do
+  def get_deposits do
     get("/deposits")
   end
 
-  def get_bank_accounts() do
+  def get_bank_accounts do
     get("/bank-accounts")
   end
 
-  def get_exchange_rates() do
+  def get_exchange_rates do
     get("/forex")
   end
 

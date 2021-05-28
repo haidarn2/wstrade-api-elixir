@@ -1,4 +1,5 @@
 defmodule WsTrade.Auth.TokenCache do
+  @moduledoc false
   use GenServer
 
   require Logger
@@ -24,7 +25,7 @@ defmodule WsTrade.Auth.TokenCache do
 
   @impl true
   def handle_info(:refresh, %{"x-refresh-token" => token}) do
-    Logger.debug("refreshing oauth token...")
+    Logger.debug("Refreshing oauth token...")
     {:ok, new_token} = refresh_token(token)
     schedule_refresh()
     {:noreply, new_token}
@@ -61,16 +62,17 @@ defmodule WsTrade.Auth.TokenCache do
   end
 
   defp refresh_token(refresh_token) do
-    with {:ok, %{status: 200, headers: headers}} <- Client.refresh(refresh_token) do
-      oauth_token =
-        headers
-        |> Map.new()
-        |> Map.take(@oauth_header_keys)
+    case Client.refresh(refresh_token) do
+      {:ok, %{status: 200, headers: headers}} ->
+        oauth_token =
+          headers
+          |> Map.new()
+          |> Map.take(@oauth_header_keys)
 
-      Logger.debug("token refresh successful. exipres on #{parse_expiry(oauth_token)}")
+        Logger.debug("Token refresh successful. expires on #{parse_expiry(oauth_token)}")
 
-      {:ok, oauth_token}
-    else
+        {:ok, oauth_token}
+
       {:error, :not_logged_in} = e ->
         e
 

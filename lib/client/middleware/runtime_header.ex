@@ -1,4 +1,5 @@
 defmodule WsTrade.Client.Middleware.RuntimeHeader do
+  @moduledoc false
   @behaviour Tesla.Middleware
 
   @impl Tesla.Middleware

@@ -58,7 +58,7 @@ defmodule WsTrade.Accounts do
    ]
   }}
   """
-  def get_accounts() do
+  def get_accounts do
     Client.get_accounts()
     |> case do
       {:ok, %{status: 200, body: body}} -> {:ok, body}
@@ -227,7 +227,7 @@ defmodule WsTrade.Accounts do
    ]
   }
   """
-  def get_deposits() do
+  def get_deposits do
     Client.get_deposits()
     |> case do
       {:ok, %{status: 200, body: body}} ->
@@ -290,7 +290,7 @@ defmodule WsTrade.Accounts do
    ]
   }}
   """
-  def get_bank_accounts() do
+  def get_bank_accounts do
     Client.get_bank_accounts()
     |> case do
       {:ok, %{status: 200, body: body}} ->
@@ -322,7 +322,7 @@ defmodule WsTrade.Accounts do
    }
   }}
   """
-  def get_exchange_rates() do
+  def get_exchange_rates do
     Client.get_exchange_rates()
     |> case do
       {:ok, %{status: 200, body: body}} ->
